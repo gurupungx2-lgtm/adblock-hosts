@@ -24,8 +24,10 @@ if [ -f dist/hosts.sha256 ] && [ "$(cat dist/hosts.sha256)" = "$SHA" ] && [ "${F
   echo "unchanged ($N domains) - nothing to do"; exit 0
 fi
 
-VCODE=$(date -u +%Y%m%d)          # monotonic: 20261103
-VER="v$(date -u +%Y.%m.%d)"       # human:     v2026.11.03
+# versionCode = YYYYMMDD + 3-hour slot (0-7) -> always increases, even for same-day rebuilds. e.g. 202611035
+SLOT=$(( 10#$(date -u +%H) / 3 ))
+VCODE="$(date -u +%Y%m%d)${SLOT}"
+VER="v$(date -u +%Y.%m.%d)"; [ "$SLOT" != "0" ] && VER="${VER}.${SLOT}"
 
 cat > build/module.prop <<PROP
 id=adblock_hosts
